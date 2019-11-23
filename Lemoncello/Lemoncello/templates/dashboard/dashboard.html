@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'miscss/dashboard.css' %}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.2/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.1/axios.min.js"></script>
+<script src="//js.pusher.com/4.0/pusher.min.js"></script>
+
+<div class="container" id="app">
+    <div class="row">
+    <div class="col-12 col-sm-2 col-md-3">
+        <Button  class="button_cont" id="btn-chat" @click="sendMessage();" value="Start">Start monitoring</Button>
+    </div>
+    <div class="col-12 col-sm-2 col-md-6">
+        <center><h2>Dashboard</h2></center>
+    </div>    
+</div>
+
+<hr>
+    <div class="row">
+        <p id="demo"></p>
+        <div class="col-12 col-sm-2 col-md-7 justify-content-center">
+          <center><h3>Events</h3><hr></center>
+
+        <div class="row"  v-for="data in conversations" :key="data">
+            <div class="profile animated flipInX " :style="'background:' + data.color + ';'" >
+
+                <div class="photo">
+                    <img :src="'media/img/' + data.className + '.jpg'" width="100%" />
+                </div>
+
+                <div class="data" >
+                     <h3 v-html=" data.className +'        '+  data.startDate "></h3>
+                    <small>
+                    <audio controls="controls">
+                        <source :src="data.audioFile">
+                        </audio>
+                </small>
+                </div>
+
+              <a class="play-button">
+                
+                <!--<svg version="1.1" xmlns="http://www.w3.org/2000/svg" 
+                     xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50">
+                  <path d="M42.7,42.7L25,50L7.3,42.7L0,25L7.3,7.3L25,0l17.7,7.3L50,25L42.7,42.7z" class="polygon"></path>
+                  <polygon points="32.5,25 21.5,31.4 21.5,18.6 "></polygon>
+                </svg>-->
+              </a>
+          </div>
+      </div>
+     </div><!--/ eventos -->
+
+    <div class="col-12 col-sm-2 col-md-4 ">
+        <center><h3>Notifications</h3><hr></center>
+
+        <div id="alert" class="alert-container" v-for="data in alerts"  :key="data">
+           <div class="shadow-lg p-4 mb-2  shakeme" :style="'background:' + data.color + ';'">
+
+            <h3 v-html="data.date"></h3><hr>
+            <h3 v-html="data.alertMessage"></h3>
+            <p>Triggered events:</p>
+            <p v-html="data.events.split(' ')[0]"></p>
+            <audio src="media/audio/notify.mp3" controls autoplay style="display: none;"></audio>
+           </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+
+
+
+
+var pusher = new Pusher('d3c25f2bb99c1dada587',{
+  cluster: 'us2'
+});
+var socketId = null;
+pusher.connection.bind('connected', function() {
+    socketId = pusher.connection.socket_id;
+
+});
+
+var my_channel = pusher.subscribe('a_channel');
+var config = { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } };
+new Vue({
+    el: "#app",
+    data: {
+        'classId' : '',
+        'alertMessage': '',
+        'conversations': [],
+        'alerts': [],
+    },
+
+    mounted() {
+        this.getConversations();
+        this.getAlerts();
+        this.listen();
+
+    },
+    methods: {
+        sendMessage() {
+            axios.post('/conversation', this.queryParams({message: this.message}), config)
+                .then(response => {
+                    this.message = '';
+                });
+        },
+        getConversations() {
+            axios.get('/events').then((response) => {
+                this.conversations = response.data;
+                this.readall();
+            });  
+        },
+        getAlerts() {
+            axios.get('/alerts').then((response) => {
+                this.alerts = response.data;
+                this.readall();
+            });  
+        },
+
+        listen() {
+            my_channel.bind("an_event", (data)=> {
+                this.conversations.unshift(data).push(data);
+                axios.post('/conversations/'+ data.id +'/delivered', this.queryParams({socket_id: socketId}));
+            })
+
+             my_channel.bind("delivered_message", (data)=> {
+                for(var i=0; i < this.conversations.length; i++){
+                    if (this.conversations[i].id == data.id){
+                        this.conversations[i].classId = data.status;
+                    }
+                }
+
+            })
+
+            my_channel.bind("an_alert", (data)=> {
+                this.alerts.unshift(data).push(data);
+                axios.post('/alerts/'+ data.id +'/alerted', this.queryParams({socket_id: socketId}));
+            })
+
+             my_channel.bind("alerted_message", (data)=> {
+                for(var i=0; i < this.alerts.length; i++){
+                    if (this.alerts[i].id == data.id){
+                        this.alerts[i].alertMessage = data.alertMessage;
+                        this.alerts[i].events = this.data.events.split(" ")
+                    }
+                }
+            })
+        },
+        readall(){
+
+              for(var i=0; i < this.conversations.length; i++){
+                axios.post('/events/'+ this.conversations[i] +'/delivered');
+                }
+            for(var i=0; i < this.alerts.length; i++){
+                axios.post('/alerts/'+ this.alerts[i] +'/alerted');
+            }
+
+        },
+        queryParams(source) {
+            var array = [];
+
+            for(var key in source) {
+                array.push(encodeURIComponent(key) + "=" + encodeURIComponent(source[key]));
+            }
+
+            return array.join("&");
+            }
+    }
+});
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,80 @@
+
+ul{
+  margin:0;
+  padding:0;
+  list-style:none;
+  position: center;
+}
+
+a {
+  color: white;
+}
+.heading.heading-icon {
+    display: block;
+}
+.padding-lg {
+  display: block;
+  padding-top: 60px;
+  padding-bottom: 60px;
+}
+.practice-area.padding-lg {
+    padding-bottom: 55px;
+    padding-top: 55px;
+}
+.practice-area .inner{ 
+     border:1px solid #999999; 
+   text-align:center; 
+   margin-bottom:28px; 
+   padding:40px 25px;
+}
+.our-webcoderskull .cnt-block:hover {
+    
+    box-shadow: inset 0 0 0 200px rgba(255,255,255,0.05);
+    border: 0;
+}
+.practice-area .inner h3{ 
+    color:#3c3c3c; 
+  font-size:24px; 
+  font-weight:500;
+  font-family: 'Poppins', sans-serif;
+  padding: 10px 0;
+}
+.practice-area .inner p{ 
+    font-size:14px; 
+  line-height:22px; 
+  font-weight:400;
+}
+.practice-area .inner img{
+  display:inline-block;
+}
+
+.our-webcoderskull .cnt-block{ 
+   float:center; 
+   width:200; 
+   background:#fff; 
+   padding:30px 20px; 
+   text-align:center; 
+   border:2px solid #d5d5d5;
+   margin: 0 0 28px;
+}
+
+.cnt-block img{ 
+   width:248px; 
+   height:300px; 
+   border-radius:100%; 
+}
+.our-webcoderskull .cnt-block h3{ 
+   color:#2a2a2a; 
+   font-size:20px; 
+   font-weight:500; 
+   padding:6px 0;
+   text-transform:uppercase;
+}
+
+.our-webcoderskull .cnt-block p{ 
+   color:#2a2a2a; 
+   font-size:13px; 
+   line-height:20px; 
+   font-weight:400;
+   text-transform:uppercase;
+}

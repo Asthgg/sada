@@ -34,7 +34,7 @@ ipython-genutils==0.2.0
 itsdangerous==1.1.0
 jedi==0.15.1
 Jinja2==2.10.3
-joblib==0.14.0
+joblib==1.2.0
 MarkupSafe==1.1.1
 ndg-httpsclient==0.5.1
 numpy==1.17.4
